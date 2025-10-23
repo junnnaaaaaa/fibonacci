@@ -31,45 +31,87 @@ void bigint3SF(const mpz_class num) {
   printf("%c.%c%ce%i\n", s[0], s[1], s[2], exp);
 }
 int main() {
+  cout << "clock speed: " << CLOCKS_PER_SEC << endl;
   double t = 0;
   int a;
   double max_t;
   mpz_class n = 0;
-  int interval;
+  double interval_S = 0;
   mpz_class sum;
-  cout << "enter method\n";
+  int entry = 1;
+  int check;
+  int variable_interval;
+  cout << "\nenter method: ";
   cin >> a;
-  cout << "enter max time (default 1s) \n";
+  cout << "\nenter max time (seconds): ";
   cin >> max_t;
-  cout << "enter intervals between checks to lower compute time\n";
-  cin >> interval;
+  cout << "\nenter intervals between fibonacci to lower compute time "
+          "(seconds): ";
+  cin >> interval_S;
+  cout << "\nvariable interval?: ";
+  cin >> variable_interval;
+  cout << "\nenter check interval as factor of interval: ";
+  cin >> check;
   bool test = (a == 0);
-  while ((t < max_t) && !test) {
-    n++;
-    if (n.get_ui() % interval == 0) {
-      clock_t start, end;
-      start = clock();
-      switch (a) {
-      case 1:
-        sum = fib_recursion(n);
-        break;
-      case 2:
-        sum = fib_linear(n);
-        break;
+  int interval_C = interval_S * CLOCKS_PER_SEC;
+
+  if (test) {
+    int n = 0;
+    const double interval_recprical = 1 / interval_S;
+    double sum = 0;
+    double interval;
+    while ((sum < max_t)) {
+      n++;
+      interval = max_t / (interval_recprical * n);
+      sum += interval;
+      if ((n % check) == 0) {
+        cout << "\ninterval: " << interval;
+        cout << "\nsum: " << sum;
       }
-      end = clock();
-      t = double(end - start) / double(CLOCKS_PER_SEC);
-      cout << "\nwhich fib: " << n;
-      cout << "\ntime taken: " << t;
-      cout << "\nfat number in scientific notation: ";
-      bigint3SF(sum);
+    }
+    cout << "\ntest result: " << n;
+  } else {
+    mpz_class n = 0;
+    while ((t < max_t)) {
+      n++;
+      if (n.get_ui() % interval_C == 0) {
+        clock_t start, end;
+        start = clock();
+        switch (a) {
+        case 1:
+          sum = fib_recursion(n);
+          break;
+        case 2:
+          sum = fib_linear(n);
+          break;
+        }
+        end = clock();
+        t = double(end - start) / double(CLOCKS_PER_SEC);
+        // cout << "\nfat number in scientific notation: ";
+        // bigint3SF(sum);
+        // interval_S = variable_interval ? max_t / interval_S : interval_S;
+        interval_C = interval_S * CLOCKS_PER_SEC;
+        // cout << "\nnew interval: " << interval_C;
+        if ((n.get_ui() % check) == 0) {
+          cout << "\nwhich fib: " << n;
+          cout << "\ntime taken: " << t;
+        }
+      }
+    }
+    // cout << "\nbweh: " << fib_linear(1004);
+    cout << "\nnth fibonacci below " << max_t << " seconds: " << n;
+
+    gmp_printf("\nfinal value to an accuracy of +- %i: ", interval_C);
+
+    bigint3SF(sum);
+    while (entry) {
+      cout << "\nenter entry you want to check compute time for, enter 0 to "
+              "exit: ";
+      cin >> entry;
+      entry /= interval_C;
+      // cout << "\ncompute time for " << entry << "th value: " << times[entry
+      // - 1];
     }
   }
-  // cout << "\nbweh: " << fib_linear(1004);
-  cout << "\nnth fibonacci below " << max_t << " seconds: " << n;
-
-  gmp_printf("\nfinal value to an accuracy of +- %i: ", interval);
-
-  bigint3SF(sum);
   return 0;
 }
